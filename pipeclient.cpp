@@ -41,6 +41,7 @@ void pipeClient::Compute(){
     if(localSocket->state() == QLocalSocket::ConnectedState){
            QByteArray reply, packet = forgePacket();
            if(packet.isEmpty())return;
+           //ui->status->append(packet.toHex());
            localSocket->write(packet);
 
            if(localSocket->waitForReadyRead(1000)){
@@ -126,7 +127,10 @@ QByteArray pipeClient::forgePacket(){
     wchar_t* func_name = new wchar_t[Function.length()];
     Function.toWCharArray(func_name);
     dataStream.writeRawData(reinterpret_cast<char*>(func_name), Function.length()*2);
-    dataStream << '\0' << '\0' << qToBigEndian(X0) << qToBigEndian(Xn) << qToBigEndian(nPoints);
+    char zero = '\0';
+    dataStream.writeRawData(&zero, 1);
+    dataStream.writeRawData(&zero, 1);
+    dataStream << qToBigEndian(X0) << qToBigEndian(Xn) << qToBigEndian(nPoints);
     if(Function == "Bessel function") dataStream << qToBigEndian(Order);
     dataStream2 << qToBigEndian(static_cast<int>(tmp.size()+4));
     packet.append(tmp);
